@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}UniEvent Analytics{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <div class="brand">UniEvent Analytics</div>
+      <nav class="main-nav">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <span class="nav-separator" aria-hidden="true">|</span>
+        <a href="{% url 'event_list' %}">Akce</a>
+        {% if role == 'admin' or role == 'teacher' %}
+        <span class="nav-separator" aria-hidden="true">|</span>
+        <a href="{% url 'event_create' %}">Nova akce</a>
+        {% endif %}
+        <span class="nav-separator" aria-hidden="true">|</span>
+        <a href="{% url 'logout' %}">Odhlasit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="msg {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <div id="loading-overlay" class="loading-overlay" hidden>
+    <div class="spinner"></div>
+    <p>Načitani...</p>
+  </div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

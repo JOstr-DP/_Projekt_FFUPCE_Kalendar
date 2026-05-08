@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | UniEvent Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Dashboard ({{ role|title }})</h1>
+  <p>Rychly prehled stavu platformy.</p>
+</section>
+
+<section class="cards">
+  <article class="card">
+    <h2>Akce celkem</h2>
+    <p class="metric">{{ events_total }}</p>
+  </article>
+  <article class="card">
+    <h2>Aktivni registrace</h2>
+    <p class="metric">{{ registrations_total }}</p>
+  </article>
+  <article class="card">
+    <h2>Waitlist</h2>
+    <p class="metric">{{ waitlist_total }}</p>
+  </article>
+</section>
+
+<section class="grid-two">
+  <article class="card">
+    <h2>Nejblizsi akce</h2>
+    <ul>
+      {% for event in upcoming_events %}
+        <li>{{ event.title }} - {{ event.date|date:'d.m.Y H:i' }} ({{ event.location }})</li>
+      {% empty %}
+        <li>Zatim nejsou zadne akce.</li>
+      {% endfor %}
+    </ul>
+  </article>
+  <article class="card">
+    <h2>Stavy registraci</h2>
+    <ul>
+      {% for row in status_counts %}
+        <li>{{ row.status }}: {{ row.total }}</li>
+      {% empty %}
+        <li>Zatim bez registraci.</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

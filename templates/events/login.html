@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prihlaseni role | UniEvent Analytics</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <h1>Prihlaseni do UniEvent Analytics</h1>
+    <p>Vyberte roli pro lokalni MVP rezim.</p>
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="msg {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post" class="role-grid" data-loading-form="1">
+      {% csrf_token %}
+      <label class="identity-label" for="identity">Jmeno (pro ownership akci)</label>
+      <input id="identity" name="identity" type="text" placeholder="napr. Jana Novakova">
+      <button type="submit" name="role" value="admin">Admin</button>
+      <button type="submit" name="role" value="teacher">Teacher</button>
+      <button type="submit" name="role" value="student">Student</button>
+      <button type="submit" name="role" value="viewer">Viewer</button>
+    </form>
+  </main>
+  <div id="loading-overlay" class="loading-overlay" hidden>
+    <div class="spinner"></div>
+    <p>Prihlasovani...</p>
+  </div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

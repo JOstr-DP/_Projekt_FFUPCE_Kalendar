@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{% if edit_mode %}Uprava udalosti{% else %}Nova udalost{% endif %} | UniEvent Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{% if edit_mode %}Uprava udalosti{% else %}Vytvoreni nove udalosti{% endif %}</h1>
+  <p>Tuto akci mohou provest pouze role teacher nebo admin.</p>
+</section>
+
+<article class="card form-card">
+  <form method="post" class="event-form" data-loading-form="1">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field-wrap {% if field.name == 'title' or field.name == 'description' %}field-full{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <div class="field-error">{{ field.errors|join:', ' }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit">{% if edit_mode %}Ulozit zmeny{% else %}Ulozit udalost{% endif %}</button>
+      <a class="btn-secondary" href="{% if edit_mode %}{% url 'event_detail' event.id %}{% else %}{% url 'event_list' %}{% endif %}">Zrusit</a>
+    </div>
+  </form>
+</article>
+{% endblock %}

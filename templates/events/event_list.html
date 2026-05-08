@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Seznam akci | UniEvent Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Seznam akci</h1>
+  <p>Filtrace podle nazvu, ucitele, mista a narocnosti.</p>
+  {% if role == 'admin' or role == 'teacher' %}
+    <p><a class="btn-secondary" href="{% url 'event_create' %}">+ Vytvorit novou udalost</a></p>
+  {% endif %}
+</section>
+
+<form method="get" class="filters" data-loading-form="1">
+  <input type="text" name="q" placeholder="Nazev akce" value="{{ filters.q }}">
+  <input type="text" name="teacher" placeholder="Ucitel" value="{{ filters.teacher }}">
+  <input type="text" name="location" placeholder="Misto" value="{{ filters.location }}">
+  <select name="difficulty">
+    <option value="">Narocnost</option>
+    {% for num in '12345' %}
+      <option value="{{ num }}" {% if filters.difficulty == num %}selected{% endif %}>{{ num }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Filtrovat</button>
+</form>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nazev</th>
+        <th>Datum</th>
+        <th>Misto</th>
+        <th>Narocnost</th>
+        <th>Ucitel</th>
+        <th>Kapacita</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+        <tr>
+          <td><a class="event-link" href="{% url 'event_detail' event.id %}">{{ event.title }}</a></td>
+          <td>{{ event.date|date:'d.m.Y H:i' }}</td>
+          <td>{{ event.location }}</td>
+          <td>{{ event.difficulty }}</td>
+          <td>{{ event.teacher.name }}</td>
+          <td>{{ event.capacity }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6">Nenalezeny zadne akce.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

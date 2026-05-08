@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Detail akce | UniEvent Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{{ event.title }}</h1>
+  <p>Kompletni detail akce.</p>
+</section>
+
+<article class="card detail-card">
+  <dl class="detail-grid">
+    <dt>Nazev</dt>
+    <dd>{{ event.title }}</dd>
+
+    <dt>Popis</dt>
+    <dd>{% if event.description %}{{ event.description }}{% else %}<span class="muted">Bez popisu</span>{% endif %}</dd>
+
+    <dt>Datum</dt>
+    <dd>{{ event.date|date:'d.m.Y H:i' }}</dd>
+
+    <dt>Mistnost</dt>
+    <dd>{{ event.location }}</dd>
+
+    <dt>Narocnost</dt>
+    <dd>{{ event.difficulty }} / 5</dd>
+
+    <dt>Ucitel</dt>
+    <dd>{{ event.teacher.name }}</dd>
+
+    <dt>Kapacita</dt>
+    <dd>{{ event.capacity }}</dd>
+
+    <dt>Reference</dt>
+    <dd>{% if event.reference %}{{ event.reference }}{% else %}<span class="muted">Neuvedeno</span>{% endif %}</dd>
+
+    <dt>Pripadny host</dt>
+    <dd>{% if event.guest %}{{ event.guest }}{% else %}<span class="muted">Bez hosta</span>{% endif %}</dd>
+  </dl>
+</article>
+
+{% if can_edit_event %}
+  <p>
+    <a class="btn-secondary" href="{% url 'event_edit' event.id %}">Upravit akci</a>
+  </p>
+{% endif %}
+
+{% if can_delete_event %}
+  <form method="post" action="{% url 'event_delete' event.id %}" onsubmit="return confirm('Opravdu chcete tuto akci smazat?');">
+    {% csrf_token %}
+    <button type="submit" class="btn-danger">Smazat akci</button>
+  </form>
+{% endif %}
+
+<p><a class="event-link" href="{% url 'event_list' %}">← Zpet na seznam akci</a></p>
+{% endblock %}
