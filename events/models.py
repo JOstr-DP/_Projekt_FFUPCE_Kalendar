@@ -14,7 +14,6 @@ class EventTemplate(models.Model):
 	title = models.CharField(max_length=200)
 	location = models.CharField(max_length=150)
 	capacity = models.PositiveIntegerField()
-	difficulty = models.PositiveSmallIntegerField()
 	filling_strategy = models.CharField(max_length=20, default='FIFO')
 	teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
 	is_archived = models.BooleanField(default=False)
@@ -38,7 +37,6 @@ class Event(models.Model):
 	date = models.DateTimeField()
 	location = models.CharField(max_length=150)
 	capacity = models.PositiveIntegerField()
-	difficulty = models.PositiveSmallIntegerField()
 	teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT, related_name='events')
 	reference = models.CharField(max_length=255, blank=True, default='')
 	guest = models.CharField(max_length=120, blank=True, default='')
@@ -53,8 +51,6 @@ class Event(models.Model):
 		ordering = ['date']
 
 	def clean(self) -> None:
-		if not 1 <= self.difficulty <= 5:
-			raise ValidationError({'difficulty': 'Difficulty must be in range 1-5.'})
 		if self.capacity <= 0:
 			raise ValidationError({'capacity': 'Capacity must be greater than zero.'})
 

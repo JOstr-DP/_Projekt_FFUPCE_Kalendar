@@ -10,6 +10,7 @@ from .forms import EventCreateForm
 from .models import Event, Registration, Teacher
 
 
+# Mapování interních rolí na popis v UI
 ALLOWED_ROLES = {'admin', 'teacher', 'ambassador', 'viewer', 'student'}
 
 ROLE_LABELS = {
@@ -21,6 +22,11 @@ ROLE_LABELS = {
 
 
 def _bootstrap_demo_events() -> None:
+	"""
+	Automaticky vytvoří 5 demo akcí když je databáze prázdná.
+	Slouží jako seed data pro testování aplikace.
+	Spustí se jen jednou, když Event.objects.all() vrátí 0 záznamů.
+	"""
 	with transaction.atomic():
 		if Event.objects.exists():
 			return
@@ -44,7 +50,7 @@ def _bootstrap_demo_events() -> None:
 				'date': now + timedelta(days=2, hours=10),
 				'location': 'Aula FF UPCE',
 				'capacity': 25,
-				'difficulty': 2,
+
 				'teacher': teacher_map['Jana Novakova'],
 			},
 			{
@@ -53,7 +59,7 @@ def _bootstrap_demo_events() -> None:
 				'date': now + timedelta(days=4, hours=8),
 				'location': 'Hlavni vestibul',
 				'capacity': 40,
-				'difficulty': 1,
+
 				'teacher': teacher_map['Petr Svoboda'],
 			},
 			{
@@ -62,7 +68,7 @@ def _bootstrap_demo_events() -> None:
 				'date': now + timedelta(days=6, hours=9),
 				'location': 'Ucebna B203',
 				'capacity': 18,
-				'difficulty': 3,
+
 				'teacher': teacher_map['Lucie Prochazkova'],
 			},
 			{
@@ -71,7 +77,7 @@ def _bootstrap_demo_events() -> None:
 				'date': now + timedelta(days=9, hours=7),
 				'location': 'Konferencni sal 1',
 				'capacity': 30,
-				'difficulty': 2,
+
 				'teacher': teacher_map['Jana Novakova'],
 			},
 			{
@@ -80,7 +86,7 @@ def _bootstrap_demo_events() -> None:
 				'date': now + timedelta(days=12, hours=11),
 				'location': 'Univerzitni galerie',
 				'capacity': 20,
-				'difficulty': 2,
+
 				'teacher': teacher_map['Petr Svoboda'],
 			},
 		]
@@ -95,8 +101,19 @@ def _bootstrap_demo_events() -> None:
 
 
 def _can_manage_event(role: str, actor_identity: str, event: Event) -> bool:
+	"""
+	Kontrola oprávnění: Kdo smí upravit/smazat akci?
+	- Admin může vždy
+	- Teacher jen pokud je autorem akce (vytvořil ji)
+	- Ostatní nemohou
+	"""
 	if role == 'admin':
 		return True
+	"""
+	Přihlášení: Výběr role (Admin/Teacher/Ambasador/Viewer) + zadání jména.
+	Při prvním vstupu se automaticky spustí bootstrap demo akcí (_bootstrap_demo_events).
+	Uloží session: selected_role, actor_identity
+	"""
 	if role == 'teacher':
 		return event.created_by_role == 'teacher' and event.created_by_identity == actor_identity
 	return False
@@ -109,7 +126,11 @@ def role_login(request):
 		if role == 'student':
 			role = 'ambassador'
 		identity = request.POST.get('identity', '').strip()
-		if role in ALLOWED_ROLES:
+		if role in ALLOWED_RO
+	"""
+	Hlavní přehled: Počet akcí, registrací, waitlistů a nejbližší akce.
+	Vidí všechny role, obsah se mění podle role (v budoucích fázích).
+	"""LES:
 			request.session['selected_role'] = role
 			role_label = ROLE_LABELS.get(role, role.title())
 			request.session['actor_identity'] = identity or role_label
@@ -134,7 +155,13 @@ def dashboard(request):
 	context = {
 		'role': role,
 		'role_label': ROLE_LABELS.get(role, role.title()),
-		'events_total': events_total,
+		'events_total': events
+	"""
+	Seznam všech akcí s filtry: hledání (název), učitel, místo.
+	Řazení: primárně podle data vzestupně.
+	- Role vidí všechny akce
+	- Admin/Teacher vidí tlačítko "+ Vytvořit novou akci"
+	"""_total,
 		'registrations_total': registrations_total,
 		'waitlist_total': waitlist_total,
 		'upcoming_events': upcoming_events,
@@ -152,16 +179,17 @@ def event_list(request):
 	q = request.GET.get('q', '').strip()
 	teacher = request.GET.get('teacher', '').strip()
 	location = request.GET.get('location', '').strip()
-	difficulty = request.GET.get('difficulty', '').strip()
-
 	if q:
 		queryset = queryset.filter(title__icontains=q)
 	if teacher:
 		queryset = queryset.filter(teacher__name__icontains=teacher)
 	if location:
-		queryset = queryset.filter(location__icontains=location)
-	if difficulty.isdigit():
-		queryset = queryset.filter(difficulty=int(difficulty))
+		queryset = queryset.filter(location__ic
+	"""
+	Detail jedné akce: všechna pole + možnost Upravit/Smazat (jen pro Admin a vlastníka).
+	- Teacher vidí jen svou akci (control _can_manage_event)
+	- Admin vždy vidí všechny
+	"""ontains=location)
 
 	events = queryset.order_by('date')
 	context = {
@@ -171,9 +199,13 @@ def event_list(request):
 			'q': q,
 			'teacher': teacher,
 			'location': location,
-			'difficulty': difficulty,
 		},
 	}
+	"""
+	Vytváření nové akce. Jen Admin a Teacher.
+	Formulář: title, description, date, location, teacher, capacity, reference, guest.
+	Teacher se vybírá z textového pole s našeptáváním – jen existující jména z DB.
+	"""
 	return render(request, 'events/event_list.html', context)
 
 
@@ -200,6 +232,10 @@ def event_create(request):
 		return redirect('role_login')
 
 	if role not in {'admin', 'teacher'}:
+	"""
+	Editace akce. Jen Admin nebo vlastník (Teacher).
+	Kontrola vlastnictví přes _can_manage_event().
+	"""
 		messages.error(request, 'Pro vytvareni udalosti nemate opravneni.')
 		return redirect('event_list')
 
@@ -226,7 +262,11 @@ def event_edit(request, event_id: int):
 		return redirect('role_login')
 
 	event = get_object_or_404(Event, pk=event_id)
-	if not _can_manage_event(role, actor_identity, event):
+	if not _can_manage_event(role, actor_ide
+	"""
+	Smazání akce. POST-only. Jen Admin nebo vlastník (Teacher).
+	Kontrola vlastnictví přes _can_manage_event().
+	"""ntity, event):
 		messages.error(request, 'Pro upravu teto udalosti nemate opravneni.')
 		return redirect('event_detail', event_id=event_id)
 
@@ -242,6 +282,9 @@ def event_edit(request, event_id: int):
 		form = EventCreateForm(instance=event)
 
 	context = {
+	"""
+	Odhlášení. Čistí session a vrací na login.
+	"""
 		'role': role,
 		'form': form,
 		'event': event,

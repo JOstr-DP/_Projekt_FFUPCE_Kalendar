@@ -40,7 +40,68 @@ Technické zadání a implementační plán pro platformu **UniEvent Analytics**
 
 ---
 
-## 📊 Datový model
+## �️ Orientace v kódu pro vývojáře
+
+### Hlavní složky a soubory
+
+```
+unievent_analytics/
+├── config/                      # Django project settings
+│   ├── settings.py              # Nastavení DB, aplikací, ALLOWED_HOSTS
+│   ├── urls.py                  # Globální routy (/healthz, /admin, /events/)
+│   └── wsgi.py                  # WSGI application pro produkci
+│
+├── events/                      # Hlavní aplikace
+│   ├── models.py               # Datové modely (Teacher, Event, Registration, EventTemplate)
+│   ├── views.py                # Business logika a renderování (přihlášení, filtry, bootstrap dat)
+│   ├── forms.py                # Django formuláře (EventCreateForm s validacemi)
+│   ├── urls.py                 # Routy aplikace (/events/, /events/<id>/, atd.)
+│   ├── admin.py                # Django admin registrace modelů
+│   └── migrations/             # Migrace databáze (0001_initial, 0002, 0003, ...)
+│
+├── templates/                  # HTML šablony
+│   ├── base.html               # Hlavní šablona (navigace, layout, messages)
+│   ├── events/
+│   │   ├── login.html          # Role selection (Admin/Teacher/Ambasador/Viewer)
+│   │   ├── dashboard.html      # Přehled akcí a registrací
+│   │   ├── event_list.html     # Tabulka akcí s filtry (hledání, učitel, místo)
+│   │   ├── event_detail.html   # Detail jedné akce + tlačítka Upravit/Smazat
+│   │   └── event_create.html   # Formulář pro novou nebo editovanou akci
+│
+├── static/                     # Statické soubory
+│   ├── css/app.css             # CSS styly (theme, layout, responsive)
+│   └── js/app.js               # JavaScript (loading overlay)
+│
+├── manage.py                   # Django CLI
+├── db.sqlite3                  # SQLite databáze (lokální dev)
+└── requirements.txt            # Python závislosti
+```
+
+### Kde hledat co
+
+| **Úkol** | **Soubor** | **Funkce/Model** |
+|:--|:--|:--|
+| Přihlášení a role | `events/views.py` | `role_login()` |
+| Bootstrap demo dat | `events/views.py` | `_bootstrap_demo_events()` |
+| Filtrování akcí | `events/views.py` | `event_list()` |
+| Vytváření akce | `events/views.py` | `event_create()` |
+| Validace formuláře | `events/forms.py` | `EventCreateForm` |
+| Datové modely | `events/models.py` | `Event`, `Teacher`, `Registration` |
+| Tabulka akcí | `templates/events/event_list.html` | - |
+| Detail akce | `templates/events/event_detail.html` | - |
+| CSS styly | `static/css/app.css` | - |
+
+### Key koncept: Role-based logika
+
+Role se ukládají v session:
+- `request.session['selected_role']` – aktuální role (admin/teacher/ambassador/viewer)
+- `request.session['actor_identity']` – jméno přihlášené osoby (pro ownership akcí)
+
+Funkce `_can_manage_event(role, actor_identity, event)` v `views.py` určuje, kdo může upravit/smazat akci.
+
+---
+
+## �📊 Datový model
 
 ```
 Teachers
@@ -54,7 +115,6 @@ Events
 ├── date
 ├── location
 ├── capacity
-├── difficulty (1-5)
 ├── teacher_id (FK)
 └── filling_strategy (FIFO)
 
@@ -71,7 +131,6 @@ EventTemplates
 ├── location
 ├── capacity
 ├── difficulty
-├── filling_strategy
 ├── teacher_id (optional)
 ├── is_archived
 └── created_by_role
@@ -160,7 +219,6 @@ Pokud se osoba #5 zruší:
 - 📍 Filtr podle místa
 - 📅 Filtr podle data (od-do)
 - 🎯 Filtr podle obtížnosti (1-5)
-- 🟢 Přepínač "Jen akce s volnou kapacitou"
 - 📊 Výchozí řazení: podle data vzestupně
 
 ---
@@ -229,10 +287,9 @@ Skupiny funkcí:
 ## 📈 Reporty a analytika
 
 ### Metriky reportu učitele
+ (fáze 3)
 
-- 📊 Počet akcí za zvolené období
-- 📉 Průměrná obtížnost akcí
-- 💺 Nabízená kapacita vs. obsazená místa
+- 📊 Počet akcí za zvolené obdobobsazená místa
 - 📋 Počty registrací: registered / waitlist / cancelled
 - 📅 Rozložení akcí podle měsíce
 - 📆 Rozložení akcí podle dne v týdnu
