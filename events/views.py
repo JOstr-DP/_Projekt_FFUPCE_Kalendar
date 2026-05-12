@@ -6,7 +6,14 @@ from .forms import EventCreateForm
 from .models import Event, Registration
 
 
-ALLOWED_ROLES = {'admin', 'teacher', 'student', 'viewer'}
+ALLOWED_ROLES = {'admin', 'teacher', 'ambassador', 'viewer', 'student'}
+
+ROLE_LABELS = {
+	'admin': 'Admin',
+	'teacher': 'Teacher',
+	'ambassador': 'Ambasador',
+	'viewer': 'Viewer',
+}
 
 
 def _can_manage_event(role: str, actor_identity: str, event: Event) -> bool:
@@ -20,11 +27,14 @@ def _can_manage_event(role: str, actor_identity: str, event: Event) -> bool:
 def role_login(request):
 	if request.method == 'POST':
 		role = request.POST.get('role', '').strip().lower()
+		if role == 'student':
+			role = 'ambassador'
 		identity = request.POST.get('identity', '').strip()
 		if role in ALLOWED_ROLES:
 			request.session['selected_role'] = role
-			request.session['actor_identity'] = identity or role.title()
-			messages.success(request, f'Prihlaseno jako: {role.title()}')
+			role_label = ROLE_LABELS.get(role, role.title())
+			request.session['actor_identity'] = identity or role_label
+			messages.success(request, f'Prihlaseno jako: {role_label}')
 			return redirect('dashboard')
 		messages.error(request, 'Neplatna role.')
 
@@ -44,6 +54,7 @@ def dashboard(request):
 
 	context = {
 		'role': role,
+		'role_label': ROLE_LABELS.get(role, role.title()),
 		'events_total': events_total,
 		'registrations_total': registrations_total,
 		'waitlist_total': waitlist_total,

@@ -8,7 +8,7 @@ Technické zadání a implementační plán pro platformu **UniEvent Analytics**
 
 ## ✨ Klíčové rysy
 
-- 🎯 **Role-based přístup** - Admin, Teacher, Student, Viewer
+- 🎯 **Role-based přístup** - Admin, Teacher, Ambasador, Viewer
 - 📋 **Správa akcí** - Vytváření, úprava, šablony, archivace
 - ⏳ **FIFO registrace** - Automatický posun z waitlistu při uvolnění místa
 - 📊 **Reporty a analytika** - PDF reporty s grafy a metrikami
@@ -85,10 +85,10 @@ EventTemplates
 |:--|:--|:--|
 | **Admin** 🔑 | Všechny operace | Vše |
 | **Teacher** 👨‍🏫 | Vytvářet/upravit akce, šablony, vidět reporty | Vlastní a cizí data |
-| **Student** 👨‍🎓 | Registrace, zrušení registrace | Vlastní data, základy akcí |
+| **Ambasador** 👨‍🎓 | Registrace, zrušení registrace, pomoc na akcích | Vlastní data, základy akcí |
 | **Viewer** 👁️ | Žádné | Základní info o akcích (název, místo, čas) |
 
-> **Waitlist viditelnost**: Student vidí své pořadí, Teacher a Admin vidí všechny
+> **Waitlist viditelnost**: Ambasador vidí své pořadí, Teacher a Admin vidí všechny
 
 ---
 
@@ -102,7 +102,7 @@ EventTemplates
 │  Vyberte si roli:               │
 │                                  │
 │  [ Admin ]  [ Teacher ]         │
-│  [ Student ]  [ Viewer ]        │
+│  [ Ambasador ]  [ Viewer ]      │
 │                                  │
 │  (bez SSO a externích služeb)   │
 └──────────────────────────────────┘
@@ -180,7 +180,7 @@ Pokud se osoba #5 zruší:
 
 ## 📊 Dashboardy
 
-### Student Dashboard 👨‍🎓
+### Ambasador Dashboard 👨‍🎓
 
 ```
 ┌──────────────────────────────────────┐
@@ -222,7 +222,7 @@ Skupiny funkcí:
 └─────────────┘ └──────────────┘
 ```
 
-> 💡 **Poznámka**: Nastavení Studenta bude v MVP přítomné vizuálně; nefunkční položky budou zašedlé
+> 💡 **Poznámka**: Nastavení Ambasadora bude v MVP přítomné vizuálně; nefunkční položky budou zašedlé
 
 ---
 
