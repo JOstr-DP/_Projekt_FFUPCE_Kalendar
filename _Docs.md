@@ -405,6 +405,8 @@ Skupiny funkcí:
 
 ### Fáze 4: Backlog 📌
 
+- [ ] **[Kritický]** Není možné se registrovat – ambasador nemá UI ani logiku pro registraci na akci
+- [ ] Viewer vidí kolonky „Aktivní registrace" a „Waitlist" – tyto sloupce by měl vidět až od role Ambasador výš
 - [ ] SSO integrace
 - [ ] Predikce obtížnosti
 - [ ] Rozšířená autentizace
