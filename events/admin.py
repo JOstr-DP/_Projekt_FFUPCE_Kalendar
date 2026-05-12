@@ -11,15 +11,15 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):
-	list_display = ('id', 'title', 'location', 'capacity', 'difficulty', 'is_archived')
-	list_filter = ('is_archived', 'difficulty', 'filling_strategy')
+	list_display = ('id', 'title', 'location', 'capacity', 'is_archived')
+	list_filter = ('is_archived', 'filling_strategy')
 	search_fields = ('title', 'location')
 
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-	list_display = ('id', 'title', 'date', 'location', 'capacity', 'difficulty', 'teacher')
-	list_filter = ('difficulty', 'teacher', 'filling_strategy')
+	list_display = ('id', 'title', 'date', 'location', 'capacity', 'teacher')
+	list_filter = ('teacher', 'filling_strategy')
 	search_fields = ('title', 'location')
 
 
