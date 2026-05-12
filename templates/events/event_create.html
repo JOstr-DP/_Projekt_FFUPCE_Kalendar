@@ -23,5 +23,10 @@
       <a class="btn-secondary" href="{% if edit_mode %}{% url 'event_detail' event.id %}{% else %}{% url 'event_list' %}{% endif %}">Zrusit</a>
     </div>
   </form>
+  <datalist id="teacher-list">
+    {% for teacher_name in form.teacher_name_choices %}
+      <option value="{{ teacher_name }}"></option>
+    {% endfor %}
+  </datalist>
 </article>
 {% endblock %}

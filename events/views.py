@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from .forms import EventCreateForm
-from .models import Event, Registration
+from .models import Event, Registration, Teacher
 
 
 ALLOWED_ROLES = {'admin', 'teacher', 'ambassador', 'viewer', 'student'}
@@ -16,6 +20,80 @@ ROLE_LABELS = {
 }
 
 
+def _bootstrap_demo_events() -> None:
+	with transaction.atomic():
+		if Event.objects.exists():
+			return
+
+		demo_teachers = [
+			('Jana Novakova', 'Katedra historie'),
+			('Petr Svoboda', 'Katedra informatiky'),
+			('Lucie Prochazkova', 'Katedra bohemistiky'),
+		]
+
+		teacher_map = {}
+		for name, department in demo_teachers:
+			teacher, _ = Teacher.objects.get_or_create(name=name, defaults={'department': department})
+			teacher_map[name] = teacher
+
+		now = timezone.now().replace(minute=0, second=0, microsecond=0)
+		demo_events = [
+			{
+				'title': 'Digitalni archiv v praxi',
+				'description': 'Zaklady prace s univerzitnim digitalnim archivem.',
+				'date': now + timedelta(days=2, hours=10),
+				'location': 'Aula FF UPCE',
+				'capacity': 25,
+				'difficulty': 2,
+				'teacher': teacher_map['Jana Novakova'],
+			},
+			{
+				'title': 'Den otevrenych dveri FF',
+				'description': 'Ambasadori pomahaji s organizaci a orientaci navstevniku.',
+				'date': now + timedelta(days=4, hours=8),
+				'location': 'Hlavni vestibul',
+				'capacity': 40,
+				'difficulty': 1,
+				'teacher': teacher_map['Petr Svoboda'],
+			},
+			{
+				'title': 'Workshop oral history',
+				'description': 'Priprava techniky a asistence behem rozhovoru.',
+				'date': now + timedelta(days=6, hours=9),
+				'location': 'Ucebna B203',
+				'capacity': 18,
+				'difficulty': 3,
+				'teacher': teacher_map['Lucie Prochazkova'],
+			},
+			{
+				'title': 'Studentska konference DH',
+				'description': 'Pomoc s registraci a koordinaci programu.',
+				'date': now + timedelta(days=9, hours=7),
+				'location': 'Konferencni sal 1',
+				'capacity': 30,
+				'difficulty': 2,
+				'teacher': teacher_map['Jana Novakova'],
+			},
+			{
+				'title': 'Komentovana prohlidka expozice',
+				'description': 'Ambasadori zajistuji podporu navstevnikum.',
+				'date': now + timedelta(days=12, hours=11),
+				'location': 'Univerzitni galerie',
+				'capacity': 20,
+				'difficulty': 2,
+				'teacher': teacher_map['Petr Svoboda'],
+			},
+		]
+
+		for payload in demo_events:
+			Event.objects.create(
+				filling_strategy='FIFO',
+				created_by_role='admin',
+				created_by_identity='System',
+				**payload,
+			)
+
+
 def _can_manage_event(role: str, actor_identity: str, event: Event) -> bool:
 	if role == 'admin':
 		return True
@@ -25,6 +103,7 @@ def _can_manage_event(role: str, actor_identity: str, event: Event) -> bool:
 
 
 def role_login(request):
+	_bootstrap_demo_events()
 	if request.method == 'POST':
 		role = request.POST.get('role', '').strip().lower()
 		if role == 'student':
